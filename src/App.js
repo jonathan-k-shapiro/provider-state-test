@@ -1,12 +1,12 @@
 import logo from './logo.svg';
 import './App.css';
 import React, { useContext, useEffect } from 'react'
-import TheProvider , { TheContext } from './TheContext'
+import { TheProvider ,TheContext } from './TheContext'
 
 
 const styles = {
-  dark: {backgroundColor: 'lightCoral', color: 'black'},
-  light: {backgroundColor: 'lightGreen', color: 'black'},
+  running: {backgroundColor: 'lightCoral', color: 'black'},
+  paused: {backgroundColor: 'lightGreen', color: 'black'},
 }
 
 
@@ -22,24 +22,27 @@ export default function App() {
 function Toolbar(props) {
   const provider = useContext(TheContext)
 
+  /* In the reducer version of this example, we don't need to protect
+  against a stale closure when installing the keypress event listener. */
   useEffect(() => {
-    function handleSpaceBarPress(event: any) {
+    function handleSpaceBarPress(event) {
+      console.log(event)
       if (
-        event.keyCode === 32 &&
-        event.target.tagName !== 'INPUT' 
+        event.code === 'Space' 
       ) {
+        event.preventDefault()
         provider.toggleInterval()
       }
     }
-    window.addEventListener('keypress', handleSpaceBarPress)
-    return () => window.removeEventListener('keypress', handleSpaceBarPress)
-  }, [provider.state  ])
+    window.addEventListener('keydown', handleSpaceBarPress)
+    return () => window.removeEventListener('keydown', handleSpaceBarPress)
+  }, [])  //Note: empty dependency array works here. Only install handler on first render.
 
   return (
     <div>
       <button 
         onClick={() => provider.toggleInterval()}
-        style={provider.state.running ? styles.dark : styles.light} 
+        style={provider.state.running ? styles.running : styles.paused} 
       >
         <p>{provider.state.intervalCount}</p>
       </button>
